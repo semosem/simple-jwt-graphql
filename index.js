@@ -30,7 +30,7 @@ const schema = buildSchema(`
   }
 `);
 
-// GraphQL root resolver
+// root resolver
 const root = {
   login: async ({ username, password }) => {
     const user = users.find((u) => u.username === username);
@@ -43,7 +43,7 @@ const root = {
       throw new Error("Invalid password");
     }
 
-    // Generate a JWT
+    // JWT
     const token = jwt.sign({ userId: user.id, role: user.role }, SECRET_KEY, {
       expiresIn: "1h",
     });
@@ -59,7 +59,7 @@ const root = {
   },
 };
 
-// Middleware to authenticate the user by checking the token
+// Middleware, authenticate the user by checking the token
 const authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (authHeader) {
