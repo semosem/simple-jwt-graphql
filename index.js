@@ -4,6 +4,8 @@ import { buildSchema } from "graphql";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
+import * as resolvers from "./resolvers";
+
 const SECRET_KEY = "akukulu";
 
 // Mock user data
@@ -31,33 +33,6 @@ const schema = buildSchema(`
 `);
 
 // root resolver
-const root = {
-  login: async ({ username, password }) => {
-    const user = users.find((u) => u.username === username);
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) {
-      throw new Error("Invalid password");
-    }
-
-    // JWT
-    const token = jwt.sign({ userId: user.id, role: user.role }, SECRET_KEY, {
-      expiresIn: "1h",
-    });
-    return token;
-  },
-
-  getUser: (args, { user }) => {
-    if (!user) {
-      throw new Error("Not authenticated");
-    }
-
-    return users.find((u) => u.id === user.userId);
-  },
-};
 
 // Middleware, authenticate the user by checking the token
 const authenticate = (req, res, next) => {
@@ -81,7 +56,7 @@ app.use(
   "/graphql",
   graphqlHTTP((req) => ({
     schema,
-    rootValue: root,
+    rootValue: resolvers,
     graphiql: true,
     context: { user: req.user },
   }))
